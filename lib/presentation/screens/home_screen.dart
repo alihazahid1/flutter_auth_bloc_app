@@ -19,53 +19,66 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(centerTitle: true, title: const Text('Home Screen')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 60),
-            Text(
-              'Welcome to Home Screen',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 60),
-            Text('Username: ${authBloc.username ?? "Guest"}'),
-            Text('Password: ${authBloc.password ?? "Guest"}'),
-            const SizedBox(height: 20),
-            MaterialButton(
-              onPressed: () async {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(isLoggedIn: false),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Welcome to Home Screen',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 60),
+              Text('Username: ${authBloc.username ?? "Guest"}'),
+              Text('Password: ${authBloc.password ?? "Guest"}'),
+              const SizedBox(height: 20),
+              MaterialButton(
+                onPressed: () async {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginScreen(isLoggedIn: false),
+                    ),
+                  );
+                },
+                child: const Icon(Icons.logout),
+              ),
+
+              MaterialButton(
+                onPressed: () async {
+                  final authBloc = context.read<AuthBloc>();
+
+                  final repo = UserRepository(
+                    accessToken: authBloc.accessToken ?? 'INVALID_TOKEN',
+                    refreshToken: authBloc.refreshToken ?? '',
+                    authBloc: authBloc,
+                  );
+                  try {
+                    final result = await repo.fetchUserData();
+                    setState(() {
+                      userData = result;
+                    });
+                  } catch (e) {
+                    print("❌ Error getting user data: $e");
+                  }
+                },
+                child: const Text('Fetch Data'),
+              ),
+              if (userData != null)
+                Container(
+                  padding: EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                );
-              },
-              child: const Icon(Icons.logout),
-            ),
-
-            MaterialButton(
-              onPressed: () async {
-                final authBloc = context.read<AuthBloc>();
-
-                final repo = UserRepository(
-                  accessToken: authBloc.accessToken ?? 'INVALID_TOKEN',
-                  refreshToken: authBloc.refreshToken ?? '',
-                  authBloc: authBloc,
-                );
-                try {
-                  final result = await repo.fetchUserData();
-                  setState(() {
-                    userData = result;
-                  });
-                } catch (e) {
-                  print("❌ Error getting user data: $e");
-                }
-              },
-              child: const Text('Fetch Data'),
-            ),
-          ],
+                  child: SelectableText(
+                    'Fetched Data:\n\n$userData',
+                    style: TextStyle(fontSize: 14, color: Colors.black87),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

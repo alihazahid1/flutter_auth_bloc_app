@@ -23,3 +23,4 @@ class AuthLocalStorage {
     return _prefs.containsKey(tokenKey);
   }
 }
+// This class handles local storage operations related to authentication tokens.
