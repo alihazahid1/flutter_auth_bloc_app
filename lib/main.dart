@@ -1,20 +1,19 @@
-import 'package:bloc_login/data/helpers/auth_local_storage.dart';
+import 'package:bloc_login/core/storage/app_storage.dart';
 import 'package:bloc_login/di/injector.dart';
-import 'package:bloc_login/presentation/bloc/bloc/auth_bloc.dart';
-import 'package:bloc_login/presentation/screens/home_screen.dart';
-import 'package:bloc_login/presentation/screens/login_screen.dart';
+import 'package:bloc_login/presentation/auth/bloc/auth_bloc.dart';
+import 'package:bloc_login/presentation/home_screen/screens/home_screen.dart';
+import 'package:bloc_login/presentation/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppStorage.instance.init();
   // Initialize the dependency injection
   await init();
 
-  final isLoggedIn = locator<AuthLocalStorage>().isLoggedIn();
+  final isLoggedIn = AppStorage.instance.accessToken != null;
   // ignore: unused_local_variable
-  final prefs = await SharedPreferences.getInstance();
 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }

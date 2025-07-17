@@ -1,5 +1,5 @@
-import 'package:bloc_login/presentation/bloc/bloc/auth_bloc.dart';
-import 'package:bloc_login/presentation/screens/home_screen.dart';
+import 'package:bloc_login/presentation/auth/bloc/auth_bloc.dart';
+import 'package:bloc_login/presentation/home_screen/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -14,44 +14,51 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Login Screen'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-
-        child: BlocListener<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is AuthSuccess) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
-              );
+      body: BlocListener<AuthBloc, AuthState>(
+        listener: (context, state) {
+          if (state is AuthSuccess) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => HomeScreen()),
+            );
+          }
+        },
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return const Center(child: CircularProgressIndicator());
             }
-          },
-          child: BlocBuilder<AuthBloc, AuthState>(
-            builder: (context, state) {
-              if (state is AuthLoading) {
-                return Center(child: CircularProgressIndicator());
-              } else if (state is AuthFailure) {
-                return Center(child: Text(state.message));
-              }
-              return Column(
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  if (state is AuthFailure)
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        state.message,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: TextFormField(
                       controller: _usernameController,
-                      decoration: InputDecoration(labelText: 'Username'),
+                      decoration: const InputDecoration(labelText: 'Username'),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: TextFormField(
                       controller: _passwordController,
-                      decoration: InputDecoration(labelText: 'Password'),
+                      decoration: const InputDecoration(labelText: 'Password'),
                       obscureText: true,
                     ),
                   ),
@@ -68,18 +75,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         color: Colors.blue,
-                        child: Text(
+                        child: const Text(
                           'Login',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
-                      SizedBox(width: 15),
+                      const SizedBox(width: 15),
                     ],
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
